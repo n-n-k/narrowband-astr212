@@ -1,5 +1,5 @@
 from astropy.io import fits
-from PIL import Image
+# from PIL import Image
 import numpy as np
 import cv2
 
@@ -9,8 +9,8 @@ def get_gradient(img):
     grad = cv2.addWeighted(np.absolute(grad_x), 0.5, np.absolute(grad_y), 0.5, 0)
     return grad
 
-halpha_filepath = 'h-alpha/M82_h-alpha_120s_bin1_210126_071544_itzamna_seo_0_RAW.fits'
-rband_filepath = 'r-band/M82_r-band_120s_bin1_210126_052734_itzamna_seo_0_RAW.fits'
+halpha_filepath = 'M82_h-alpha_120s_bin1_210126_071544_itzamna_seo_0_RAW.fits'
+rband_filepath = 'M82_r-band_120s_bin1_210126_052734_itzamna_seo_0_RAW.fits'
 
 '''
 hdul = fits.open(filepath, do_not_scale_image_data=False)
@@ -27,10 +27,9 @@ halpha_fits = fits.open(halpha_filepath, do_not_scale_image_data=False)
 rband = rband_fits[0].data
 halpha = halpha_fits[0].data
 
-#rband = np.array(rband).astype('uint16')
-#print(rband)
 rband_temp = np.array(rband).astype('float32')
 halpha_temp = np.array(halpha).astype('float32')
+
 #rband = cv2.cvtColor(rband, cv2.COLOR_BGR2GRAY)
 #halpha = cv2.cvtColor(halpha, cv2.COLOR_BGR2GRAY)
 
