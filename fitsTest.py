@@ -310,7 +310,7 @@ shift, triangle_inds = calc_shift(rband_triangles, halpha_triangles)
 updated_halpha = shift_narrowband(rband_filepath, 
                                   halpha_filepath, 
                                   shift, 
-                                  'M82_h-alpha_120s_bin1_120_21026_071544_itzamna_seo_0_WCS.fits')
+                                  'M82_h-alpha_120s_bin1_21026_071544_itzamna_seo_0_WCS.fits')
 
 # Create display images for rband and halpha
 # Only draw matching triangles
