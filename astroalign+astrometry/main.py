@@ -1,3 +1,9 @@
+"""
+Author: Simon Mahns
+Description: This code leverages astroalign and astrometry to get new WCS coordates for an narrowband image.
+"""
+
+
 import astroalign as aa
 from astropy.io import fits
 import numpy as np
