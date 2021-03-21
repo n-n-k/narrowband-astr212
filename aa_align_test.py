@@ -10,7 +10,7 @@ halpha_fits = fits.open(halpha_filepath, do_not_scale_image_data=False)
 rband = rband_fits[0].data
 halpha = halpha_fits[0].data
 
-registered_image, footprint = aa.register(halpha, rband)
+registered_image, footprint = aa.register(halpha, rband) 
 
 new_fits = fits.HDUList([fits.PrimaryHDU(registered_image)])
 new_fits.writeto('test.fits')
