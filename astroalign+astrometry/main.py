@@ -10,7 +10,8 @@ import random
 from urllib.parse import urlencode, quote
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError
-OUTPUTFILE = "aaedBroadband.png"
+import io
+OUTPUTFILE = "aaedBroadband.jpg"
 
 halpha_filepath = '../M82_h-alpha_120s_bin1_210126_071544_itzamna_seo_0_RAW.fits'
 rband_filepath = '../M82_r-band_120s_bin1_210126_052734_itzamna_seo_0_RAW.fits'
@@ -21,27 +22,37 @@ halpha_fits = fits.open(halpha_filepath, do_not_scale_image_data=False)
 rband16 = rband_fits[0].data
 halpha16 = halpha_fits[0].data
 
-rband8 = cv2.normalize(rband16, None, 0, 255,
-                       cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-
-halpha8 = cv2.normalize(halpha16, None, 0, 255,
-                        cv2.NORM_MINMAX, dtype=cv2.CV_8U)
-
 rband16Rgb1 = cv2.cvtColor(rband16, cv2.COLOR_BayerGB2RGB)
 halpha16Rgb1 = cv2.cvtColor(halpha16, cv2.COLOR_BayerGB2RGB)
-
 cv2.imwrite('source.png', rband16Rgb1)
 cv2.imwrite('target.png', halpha16Rgb1)
 
 # for reference: aa.register(source, target)
 # we are transforming the broadband image to match the narrowband
 registered, footprint = aa.register(rband16Rgb1, halpha16Rgb1)
-time.sleep(3)
+
+# some opencv magic to clean up the image
+registered = cv2.normalize(registered, None, 0, 255,
+                           cv2.NORM_MINMAX, dtype=cv2.CV_8U)
+
+# save file
 cv2.imwrite(OUTPUTFILE, np.uint8(registered))
 
-time.sleep(3)
-print("Preparing to complete WCS solve...")
+# get transformation data for the hell of it
+p, (pos_img, pos_img_rot) = aa.find_transform(rband16Rgb1, halpha16Rgb1)
+print("Rotation: {:.2f} degrees".format(p.rotation * 180.0 / np.pi))
+print("\nScale factor: {:.2f}".format(p.scale))
+print("\nTranslation: (x, y) = ({:.2f}, {:.2f})".format(*p.translation))
+print("\nTranformation matrix:\n{}".format(p.params))
+print("\nPoint correspondence:")
+for (x1, y1), (x2, y2) in zip(pos_img, pos_img_rot):
+    print("({:.2f}, {:.2f}) is source --> ({:.2f}, {:.2f}) in target"
+          .format(x1, y1, x2, y2))
 
+
+print("==========================")
+print("Preparing to complete WCS solve...")
+time.sleep(3)
 # connect to api, get token
 apiKey = "oppqxlkuubsdwsok"  # Key from Simon Mahns
 R = requests.post('http://nova.astrometry.net/api/login',
@@ -70,9 +81,12 @@ data_pre2 = "--" + boundary + "\n" + \
     'MIME-Version: 1.0\r\n' + 'Content-disposition: form-data; name="file"; filename="' + \
     OUTPUTFILE + '"' + '\r\n' + '\r\n'
 print(data_pre2)
-
+with open(OUTPUTFILE, "rb") as image:
+    f = image.read()
+    b = bytearray(f)
+    print(b[0])
 data_post = ('\n' + '--' + boundary + '--\n')
-data = data_pre2.encode() + OUTPUTFILE.encode() + data_post.encode()
+data = data_pre2.encode() + b + data_post.encode()
 
 resp = Request(url="http://nova.astrometry.net/api/upload",
                headers=headers, data=data)
