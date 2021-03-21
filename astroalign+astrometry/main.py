@@ -1,5 +1,6 @@
 """
 Author: Simon Mahns
+Contact: simonm@uchicago.edu
 Description: This code leverages astroalign and astrometry to get new WCS coordates for an narrowband image.
 """
 
