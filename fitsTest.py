@@ -82,7 +82,7 @@ def image_proc(path):
     image_clipped = np.array(image_clipped * 255, np.uint8)
     
     # Apply a Median Blur with a 15x15 kernel
-    blur = cv2.medianBlur(image_workon, 15)
+    blur = cv2.medianBlur(image_clipped, 15)
     
     # Find edge contours in the blurred image
     contours, hierarchy = cv2.findContours(blur,
@@ -112,7 +112,7 @@ def image_proc(path):
     if len(stars) > 2:
         triangles = make_triangles(stars)
         
-    return image, image_workon, blur, contours, stars, radii, triangles
+    return image, image_clipped, blur, contours, stars, radii, triangles
 
 
 def calc_shift(reference_triangles, narrowband_triangles):
@@ -299,9 +299,9 @@ rband_filepath = 'M82_r-band_120s_bin1_210126_052734_itzamna_seo_0_FCAL.fits'
 halpha_filepath = 'M82_h-alpha_120s_bin1_210126_071544_itzamna_seo_0_HPX.fits'
 
 # Process the rband and halpha images
-rband, rband_workon, rband_blur, rband_contours, rband_stars, rband_radii, rband_triangles = image_proc(rband_filepath)
+rband, rband_clipped, rband_blur, rband_contours, rband_stars, rband_radii, rband_triangles = image_proc(rband_filepath)
 
-halpha, halpha_workon, halpha_blur, halpha_contours, halpha_stars, halpha_radii, halpha_triangles = image_proc(halpha_filepath)
+halpha, halpha_clipped, halpha_blur, halpha_contours, halpha_stars, halpha_radii, halpha_triangles = image_proc(halpha_filepath)
 
 # Compute the shift between the halpha and rband image
 shift, triangle_inds = calc_shift(rband_triangles, halpha_triangles)
@@ -310,7 +310,7 @@ shift, triangle_inds = calc_shift(rband_triangles, halpha_triangles)
 updated_halpha = shift_narrowband(rband_filepath, 
                                   halpha_filepath, 
                                   shift, 
-                                  'M82_h-alpha_120s_bin1_120_21026_052734_itzamna_seo_0_WCS.fits')
+                                  'M82_h-alpha_120s_bin1_120_21026_071544_itzamna_seo_0_WCS.fits')
 
 # Create display images for rband and halpha
 # Only draw matching triangles
