@@ -29,14 +29,14 @@ halpha_fits = fits.open(halpha_filepath, do_not_scale_image_data=False)
 rband16 = rband_fits[0].data
 halpha16 = halpha_fits[0].data
 
-rband16Rgb1 = cv2.cvtColor(rband16, cv2.COLOR_BayerGB2RGB)
-halpha16Rgb1 = cv2.cvtColor(halpha16, cv2.COLOR_BayerGB2RGB)
-cv2.imwrite('source.png', rband16Rgb1)
-cv2.imwrite('target.png', halpha16Rgb1)
+rband8Rgb1 = cv2.cvtColor(rband16, cv2.COLOR_BayerGB2RGB)
+halpha8Rgb1 = cv2.cvtColor(halpha16, cv2.COLOR_BayerGB2RGB)
+cv2.imwrite('source.png', rband8Rgb1)
+cv2.imwrite('target.png', halpha8Rgb1)
 
 # for reference: aa.register(source, target)
 # we are transforming the broadband image to match the narrowband
-registered, footprint = aa.register(rband16Rgb1, halpha16Rgb1)
+registered, footprint = aa.register(rband8Rgb1, halpha8Rgb1)
 
 # some opencv magic to clean up the image
 registered = cv2.normalize(registered, None, 0, 255,
@@ -46,7 +46,7 @@ registered = cv2.normalize(registered, None, 0, 255,
 cv2.imwrite(OUTPUTFILE, np.uint8(registered))
 
 # get transformation data for the hell of it
-p, (pos_img, pos_img_rot) = aa.find_transform(rband16Rgb1, halpha16Rgb1)
+p, (pos_img, pos_img_rot) = aa.find_transform(rband8Rgb1, halpha8Rgb1)
 print("Rotation: {:.2f} degrees".format(p.rotation * 180.0 / np.pi))
 print("\nScale factor: {:.2f}".format(p.scale))
 print("\nTranslation: (x, y) = ({:.2f}, {:.2f})".format(*p.translation))
@@ -97,10 +97,7 @@ data = data_pre2.encode() + b + data_post.encode()
 
 resp = Request(url="http://nova.astrometry.net/api/upload",
                headers=headers, data=data)
-# post image
-# resp = requests.post('http://nova.astrometry.net/api/url_upload',
-#
-#                data=data)
+
 f = urlopen(resp)
 txt = f.read()
 subid = json.loads(txt)["subid"]
